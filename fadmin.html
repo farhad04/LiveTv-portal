@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard | FARHAD Live Tv</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #0a0a0a; color: white; font-family: sans-serif; padding: 25px; }
+        input, select { background: #111 !important; border: 1px solid #333 !important; color: white; padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 10px; }
+        .card { background: #111; padding: 25px; border-radius: 15px; border: 1px solid #222; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="max-w-5xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-red-600">Admin Panel</h1>
+
+        <div class="flex gap-4 mb-8">
+            <a href="tv.html" class="bg-white text-black px-5 py-2 rounded font-bold text-xs uppercase">Visit Site</a>
+            <button onclick="if(confirm('Reset all data?')) { localStorage.clear(); location.reload(); }" class="bg-red-900 px-5 py-2 rounded font-bold text-xs uppercase">Reset All Data</button>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- Manage Categories -->
+            <div class="card">
+                <h2 class="text-xl font-bold mb-4 text-zinc-400">1. Categories (Drag Order)</h2>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="new-cat" placeholder="Category Name" class="!mb-0">
+                    <button onclick="addCategory()" class="bg-green-600 px-4 rounded font-bold">ADD</button>
+                </div>
+                <div id="cat-list-admin" class="space-y-2"></div>
+            </div>
+
+            <!-- M3U Import -->
+            <div class="card">
+                <h2 class="text-xl font-bold mb-4 text-blue-500">2. M3U Bulk Import</h2>
+                <input type="text" id="m3u-url" placeholder="Paste M3U Playlist Link">
+                <button onclick="importM3U()" class="w-full bg-blue-600 p-3 rounded font-bold">IMPORT NOW</button>
+            </div>
+
+            <!-- Add/Edit Channel -->
+            <div class="card lg:col-span-2">
+                <h2 class="text-xl font-bold mb-4 text-zinc-400">3. Add / Edit Channel</h2>
+                <input type="hidden" id="edit-index">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <input type="text" id="ch-name" placeholder="Channel Name">
+                    <input type="text" id="ch-logo" placeholder="Logo URL">
+                </div>
+                <input type="text" id="ch-url" placeholder="Stream URL (M3U8)">
+                <select id="ch-cat"></select>
+                <button onclick="saveChannel()" id="save-btn" class="w-full bg-red-600 p-3 rounded font-bold">SAVE CHANNEL</button>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card">
+            <h2 class="text-xl font-bold mb-4 uppercase">Channel List</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="border-b border-zinc-800 text-zinc-500 text-xs uppercase">
+                        <tr><th class="p-3">Name</th><th class="p-3">Category</th><th class="p-3 text-right">Action</th></tr>
+                    </thead>
+                    <tbody id="admin-chan-table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const KEY_CH = 'farhad_pro_v7_ch';
+        const KEY_CAT = 'farhad_pro_v7_cat';
+
+        let channels = JSON.parse(localStorage.getItem(KEY_CH)) || [];
+        let categories = JSON.parse(localStorage.getItem(KEY_CAT)) || ["All", "Akash Go", "Ayna OTT", "SonyLiv", "Sports"];
+
+        function loadAdmin() {
+            const select = document.getElementById('ch-cat');
+            select.innerHTML = '';
+            categories.forEach(cat => { if(cat !== 'All') select.innerHTML += `<option value="${cat}">${cat}</option>`; });
+
+            const catDiv = document.getElementById('cat-list-admin');
+            catDiv.innerHTML = '';
+            categories.forEach((cat, i) => {
+                if(cat === 'All') return;
+                catDiv.innerHTML += `
+                    <div class="flex justify-between items-center bg-zinc-900 p-2 rounded border border-zinc-800">
+                        <span class="text-sm font-bold">${cat}</span>
+                        <div class="flex gap-2">
+                            <button onclick="moveCat(${i}, -1)"><i class="fas fa-arrow-up text-xs"></i></button>
+                            <button onclick="moveCat(${i}, 1)"><i class="fas fa-arrow-down text-xs"></i></button>
+                            <button onclick="deleteCat('${cat}')"><i class="fas fa-trash text-red-500 text-xs"></i></button>
+                        </div>
+                    </div>`;
+            });
+
+            const table = document.getElementById('admin-chan-table');
+            table.innerHTML = '';
+            channels.forEach((ch, i) => {
+                table.innerHTML += `<tr class="border-b border-zinc-900"><td class="p-3 text-sm">${ch.name}</td><td class="p-3 text-xs text-zinc-500 uppercase">${ch.category}</td><td class="p-3 text-right"><button onclick="editCh(${i})" class="text-blue-500 mr-2"><i class="fas fa-edit"></i></button><button onclick="deleteCh(${i})" class="text-red-500"><i class="fas fa-trash"></i></button></td></tr>`;
+            });
+
+            localStorage.setItem(KEY_CH, JSON.stringify(channels));
+            localStorage.setItem(KEY_CAT, JSON.stringify(categories));
+        }
+
+        function addCategory() {
+            const name = document.getElementById('new-cat').value.trim();
+            if(name && !categories.includes(name)) { categories.push(name); document.getElementById('new-cat').value = ''; loadAdmin(); }
+        }
+
+        function deleteCat(cat) { categories = categories.filter(c => c !== cat); loadAdmin(); }
+
+        function moveCat(idx, dir) {
+            let next = idx + dir;
+            if(next >= 1 && next < categories.length) { [categories[idx], categories[next]] = [categories[next], categories[idx]]; loadAdmin(); }
+        }
+
+        function saveChannel() {
+            const name = document.getElementById('ch-name').value;
+            const url = document.getElementById('ch-url').value;
+            const logo = document.getElementById('ch-logo').value;
+            const cat = document.getElementById('ch-cat').value;
+            const editIdx = document.getElementById('edit-index').value;
+
+            if(!name || !url || !cat) return alert("Fill Name, URL and Category!");
+
+            if(editIdx !== "") channels[editIdx] = {name, url, logo, category: cat};
+            else channels.push({name, url, logo, category: cat});
+
+            document.getElementById('ch-name').value = '';
+            document.getElementById('ch-url').value = '';
+            document.getElementById('ch-logo').value = '';
+            document.getElementById('edit-index').value = '';
+            loadAdmin();
+        }
+
+        function editCh(i) {
+            const ch = channels[i];
+            document.getElementById('ch-name').value = ch.name;
+            document.getElementById('ch-url').value = ch.url;
+            document.getElementById('ch-logo').value = ch.logo;
+            document.getElementById('ch-cat').value = ch.category;
+            document.getElementById('edit-index').value = i;
+            document.getElementById('save-btn').innerText = "UPDATE CHANNEL";
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function deleteCh(i) { if(confirm("Delete channel?")) { channels.splice(i, 1); loadAdmin(); } }
+
+        async function importM3U() {
+            const url = document.getElementById('m3u-url').value;
+            if(!url) return alert("Enter M3U Link!");
+            try {
+                const res = await fetch("https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(url));
+                const data = await res.text();
+                const lines = data.split('\n');
+                lines.forEach((line, i) => {
+                    if (line.includes("#EXTINF:")) {
+                        const name = line.split(',')[1]?.trim();
+                        const logo = line.match(/tvg-logo="(.*?)"/)?.[1] || "";
+                        const group = line.match(/group-title="(.*?)"/)?.[1] || "Imported";
+                        const stream = lines[i+1]?.trim();
+                        if(stream && stream.startsWith("http")) {
+                            if(!categories.includes(group)) categories.push(group);
+                            channels.push({name, url: stream, logo, category: group});
+                        }
+                    }
+                });
+                alert("Imported!"); loadAdmin();
+            } catch (e) { alert("Failed!"); }
+        }
+
+        loadAdmin();
+    </script>
+</body>
+</html>

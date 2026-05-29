@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FARHAD Live Tv | LIVE TV</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body { background-color: #050505; color: white; font-family: sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* স্টাইলিশ রেড টাইটেল */
+        .brand-name {
+            font-family: 'Orbitron', sans-serif;
+            color: #ff0000;
+            text-shadow: 0 0 15px rgba(255, 0, 0, 0.8), 2px 2px 4px #000;
+            letter-spacing: 1px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        /* আবছা ওয়াটারমার্ক */
+        .farhad-watermark {
+            position: absolute;
+            bottom: 12px;
+            right: 18px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.18); 
+            letter-spacing: 2px;
+            pointer-events: none;
+            z-index: 10;
+            text-transform: uppercase;
+        }
+
+        .cat-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #888;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        .cat-btn.active {
+            background: #ff0000;
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+        .channel-card {
+            background: #111;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .channel-card:hover { border-color: #ff0000; transform: translateY(-3px); }
+        .channel-card img {
+            width: 45px; height: 45px;
+            object-fit: contain;
+            margin: 0 auto 8px;
+            border-radius: 8px;
+            background: #000;
+        }
+    </style>
+</head>
+<body class="bg-[#050505] text-white">
+
+    <header class="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-md border-b border-white/5">
+        <nav class="container mx-auto px-4 h-14 flex items-center justify-between">
+            <h1 class="text-base md:text-lg brand-name">FARHAD <span class="text-white">Live Tv</span></h1>
+            <div class="text-right">
+                <div id="clock-time" class="text-red-500 font-mono font-bold text-[11px] md:text-sm">00:00:00 AM</div>
+                <div id="clock-date" class="text-[8px] text-zinc-500 uppercase font-bold">Loading...</div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="pt-16 container mx-auto px-4 pb-10">
+        <section class="max-w-4xl mx-auto">
+            <div class="relative rounded-2xl overflow-hidden bg-black aspect-video border border-white/10 shadow-2xl">
+                <video id="video-player" class="w-full h-full" controls autoplay playsinline poster="https://img.freepik.com/premium-photo/tv-remote-control-with-neon-light_23-2149236754.jpg"></video>
+                <div class="farhad-watermark">FARHAD</div>
+                <div id="player-loader" class="absolute inset-0 flex flex-col items-center justify-center bg-black/80 hidden">
+                    <div class="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            </div>
+            <div class="mt-3 flex items-center gap-4 bg-zinc-900/50 p-3 rounded-xl border border-white/5">
+                <img id="current-logo" src="https://cdn-icons-png.flaticon.com/512/716/716429.png" class="w-10 h-10 object-contain">
+                <div>
+                    <h2 id="current-title" class="font-bold text-xs">Select a Channel</h2>
+                    <p id="current-cat" class="text-[9px] text-red-500 font-bold uppercase">Streaming</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="mt-6 flex gap-2 overflow-x-auto no-scrollbar pb-2" id="category-tabs">
+            <!-- ক্যাটাগরিগুলো এখানে আসবে -->
+        </div>
+
+        <section class="mt-4">
+            <div id="status-msg" class="flex flex-col items-center py-20 text-zinc-500">
+                <div class="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p class="text-xs uppercase font-bold">Fetching Live Playlists...</p>
+            </div>
+            <div id="channel-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+        </section>
+    </main>
+
+    <script>
+        const KEY_CH = 'farhad_pro_v7_ch';
+        const KEY_CAT = 'farhad_pro_v7_cat';
+        const proxy = "https://api.codetabs.com/v1/proxy?quest=";
+
+        // আপনার দেওয়া নতুন সব প্লেলিস্ট সোর্স
+        const autoSources = [
+            { url: "https://raw.githubusercontent.com/srhady/fifaplus/refs/heads/main/fifa_live.m3u", cat: "FIFA" },
+            { url: "https://raw.githubusercontent.com/srhady/Hady/refs/heads/main/akash_live.m3u", cat: "AKASH GO TV" },
+            { url: "https://raw.githubusercontent.com/srhady/SonyLiv/refs/heads/main/sonyliv_playlist.m3u", cat: "SonyLiv" },
+            { url: "https://raw.githubusercontent.com/farhad04/AynaOtt/refs/heads/main/Aynaott.m3u", cat: "Ayna ott" },
+            { url: "https://raw.githubusercontent.com/srhady/Fancode-bd/refs/heads/main/main_playlist.m3u", cat: "Sports" },
+            { url: "https://raw.githubusercontent.com/srhady/crichd-speical-live-event/refs/heads/main/playlist.m3u", cat: "Sports" },
+            { url: "https://raw.githubusercontent.com/srhady/axsports/refs/heads/main/playlist.m3u", cat: "Sports" }
+        ];
+
+        let allChannels = [];
+        let categories = ["All"];
+
+        async function fetchAllPlaylists() {
+            for (const source of autoSources) {
+                try {
+                    const response = await fetch(proxy + encodeURIComponent(source.url));
+                    const data = await response.text();
+                    parseM3U(data, source.cat);
+                } catch (e) { console.error("Error loading: " + source.cat); }
+            }
+            
+            // এডমিন প্যানেলের ম্যানুয়াল চ্যানেলগুলো যোগ করা
+            const manualChannels = JSON.parse(localStorage.getItem(KEY_CH)) || [];
+            allChannels = [...allChannels, ...manualChannels];
+            
+            const manualCats = JSON.parse(localStorage.getItem(KEY_CAT)) || [];
+            categories = [...new Set([...categories, ...manualCats])];
+
+            document.getElementById('status-msg').style.display = 'none';
+            renderUI();
+        }
+
+        function parseM3U(data, defaultCat) {
+            const lines = data.split('\n');
+            let current = null;
+            lines.forEach(line => {
+                line = line.trim();
+                if (line.startsWith("#EXTINF:")) {
+                    const name = line.split(',')[1]?.trim() || "Live TV";
+                    const logo = line.match(/tvg-logo="(.*?)"/)?.[1] || "";
+                    current = { name, logo, category: defaultCat };
+                    if (!categories.includes(defaultCat)) categories.push(defaultCat);
+                } else if (line.startsWith("http")) {
+                    if (current) {
+                        current.url = line;
+                        allChannels.push(current);
+                        current = null;
+                    }
+                }
+            });
+        }
+
+        function renderUI() {
+            renderCategoryTabs();
+            renderChannels(allChannels);
+        }
+
+        function renderCategoryTabs() {
+            const tabs = document.getElementById('category-tabs');
+            tabs.innerHTML = '';
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `cat-btn ${cat === 'All' ? 'active' : ''}`;
+                btn.innerText = cat.toUpperCase();
+                btn.onclick = () => filterCat(cat, btn);
+                tabs.appendChild(btn);
+            });
+        }
+
+        function renderChannels(list) {
+            const grid = document.getElementById('channel-grid');
+            grid.innerHTML = '';
+            list.sort((a, b) => a.name.localeCompare(b.name));
+            list.forEach(ch => {
+                const div = document.createElement('div');
+                div.className = 'channel-card';
+                div.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/716/716429.png'"><h3 class="text-[9px] font-bold truncate uppercase">${ch.name}</h3>`;
+                div.onclick = () => playStream(ch);
+                grid.appendChild(div);
+            });
+        }
+
+        function playStream(ch) {
+            const video = document.getElementById('video-player');
+            document.getElementById('current-title').innerText = ch.name;
+            document.getElementById('current-cat').innerText = ch.category;
+            document.getElementById('current-logo').src = ch.logo;
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(ch.url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = ch.url;
+                video.play();
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function filterCat(catName, btn) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (catName === 'All') renderChannels(allChannels);
+            else renderChannels(allChannels.filter(c => c.category === catName));
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock-time').innerText = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('clock-date').innerText = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+        fetchAllPlaylists();
+        window.addEventListener('storage', () => location.reload());
+    </script>
+</body>
+</html>
