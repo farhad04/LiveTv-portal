@@ -155,13 +155,21 @@ if (cached) {
     allChannels = JSON.parse(cached);
     renderUI();
 }
-            for (const source of autoSources) {
-                try {
-                    const response = await fetch(proxy + encodeURIComponent(source.url));
-                    const data = await response.text();
-                    parseM3U(data, source.cat);
-                } catch (e) { console.error("Error loading: " + source.cat); }
-            }
+            await Promise.all(
+    autoSources.map(async (source) => {
+        try {
+            const response = await fetch(
+                proxy + encodeURIComponent(source.url)
+            );
+
+            const data = await response.text();
+            parseM3U(data, source.cat);
+
+        } catch (e) {
+            console.error("Error loading: " + source.cat);
+        }
+    })
+);
             
             // এডমিন প্যানেলের ম্যানুয়াল চ্যানেলগুলো যোগ করা
             const manualChannels = JSON.parse(localStorage.getItem(KEY_CH)) || [];
