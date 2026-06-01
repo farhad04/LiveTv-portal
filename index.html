@@ -149,6 +149,12 @@
         let categories = ["All"];
 
         async function fetchAllPlaylists() {
+            const cached = localStorage.getItem('cached_channels');
+
+if (cached) {
+    allChannels = JSON.parse(cached);
+    renderUI();
+}
             for (const source of autoSources) {
                 try {
                     const response = await fetch(proxy + encodeURIComponent(source.url));
@@ -164,6 +170,10 @@
             const manualCats = JSON.parse(localStorage.getItem(KEY_CAT)) || [];
             categories = [...new Set([...categories, ...manualCats])];
 
+            localStorage.setItem(
+    'cached_channels',
+    JSON.stringify(allChannels)
+);
             document.getElementById('status-msg').style.display = 'none';
             renderUI();
         }
