@@ -228,6 +228,12 @@ if (!categories.includes(group || defaultCat))
         }
 
         function renderChannels(list) {
+            list = list.filter(
+    (channel, index, self) =>
+        index === self.findIndex(
+            c => c.name.toLowerCase() === channel.name.toLowerCase()
+        )
+);
             const grid = document.getElementById('channel-grid');
             grid.innerHTML = '';
             list.sort((a, b) => a.name.localeCompare(b.name));
