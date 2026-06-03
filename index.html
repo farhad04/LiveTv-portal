@@ -113,14 +113,29 @@ to{background-position:200% center;}
                     <div class="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
                 </div>
             </div>
-            <div class="mt-4 mb-4 relative">
-    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"></i>
-    <input
-        type="text"
-        id="searchInput"
-        placeholder="🔍🔎Search channels..."
-        class="w-full bg-zinc-900/80 border border-zinc-700 rounded-2xl pl-12 pr-4 py-3 text-white text-sm outline-none focus:border-red-500"
-    >
+            <div class="mt-4 mb-4 flex gap-2">
+
+    <div class="relative flex-[4]">
+        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"></i>
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="🔍 Search channels..."
+            class="w-full bg-zinc-900/80 border border-zinc-700 rounded-2xl pl-12 pr-4 py-3 text-white text-sm outline-none focus:border-red-500"
+        >
+    </div>
+
+    <div class="flex-[1]">
+        <a
+            href="https://farhad04.github.io/tv2/"
+            class="w-full px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap flex items-center justify-center"
+            style="background:linear-gradient(to right,#ff007f,#00f2fe,#4facfe,#ff007f);color:white;"
+        >
+            TV 2
+        </a>
+    </div>
+
 </div>
             <div class="mt-3 flex items-center gap-4 bg-zinc-900/50 p-3 rounded-xl border border-white/5">
                 <img id="current-logo" src="https://cdn-icons-png.flaticon.com/512/716/716429.png" class="w-10 h-10 object-contain">
