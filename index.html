@@ -264,6 +264,9 @@ if (!categories.includes(finalCategory)) {
 
         function renderCategoryTabs() {
             const tabs = document.getElementById('category-tabs');
+            categories = categories.filter(c => c !== "FiFa⚽");
+
+categories.splice(2, 0, "FiFa⚽");
             tabs.innerHTML = '';
             categories.forEach(cat => {
                 const btn = document.createElement('button');
