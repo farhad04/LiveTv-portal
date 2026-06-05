@@ -176,7 +176,6 @@ NEXT ⏭
     <script>
         const KEY_CH = 'farhad_pro_v7_ch';
         const KEY_CAT = 'farhad_pro_v7_cat';
-        const proxy = "https://api.codetabs.com/v1/proxy?quest=";
 
         // আপনার দেওয়া নতুন সব প্লেলিস্ট সোর্স
         const autoSources = [
@@ -194,18 +193,10 @@ NEXT ⏭
         let currentChannelIndex = 0;
 
         async function fetchAllPlaylists() {
-            const cached = localStorage.getItem('cached_channels');
-
-if (cached) {
-    allChannels = JSON.parse(cached);
-    renderUI();
-}
             await Promise.all(
     autoSources.map(async (source) => {
         try {
-            const response = await fetch(
-                proxy + encodeURIComponent(source.url)
-            );
+            const response = await fetch(source.url);
 
             const data = await response.text();
             parseM3U(data, source.cat);
@@ -241,14 +232,20 @@ if (cached) {
                     const logo = line.match(/tvg-logo="(.*?)"/)?.[1] || "";
                     const group = line.match(/group-title="(.*?)"/)?.[1];
 
+const finalCategory =
+    defaultCat === "Auto"
+        ? (group || "Others")
+        : defaultCat;
+
 current = {
     name,
     logo,
-    category: group || defaultCat
+    category: finalCategory
 };
 
-if (!categories.includes(group || defaultCat))
-    categories.push(group || defaultCat);
+if (!categories.includes(finalCategory)) {
+    categories.push(finalCategory);
+}
                 } else if (line.startsWith("http")) {
                     if (current) {
                         current.url = line;
