@@ -143,6 +143,19 @@ to{background-position:200% center;}
                     <h2 id="current-title" class="font-bold text-xs">Select a Channel</h2>
                     <p id="current-cat" class="text-[9px] text-red-500 font-bold uppercase">Streaming</p>
                 </div>
+                <div class="flex gap-2 mt-2">
+
+<button id="prevBtn"
+class="cat-btn flex-1">
+⏮ PREV
+</button>
+
+<button id="nextBtn"
+class="cat-btn flex-1">
+NEXT ⏭
+</button>
+
+                </div>
             </div>
         </section>
         <div class="mt-6 flex gap-2 overflow-x-auto no-scrollbar pb-2" id="category-tabs">
@@ -176,6 +189,7 @@ to{background-position:200% center;}
 
         let allChannels = [];
         let categories = ["All"];
+        let currentChannelIndex = 0;
 
         async function fetchAllPlaylists() {
             const cached = localStorage.getItem('cached_channels');
@@ -261,6 +275,12 @@ if (!categories.includes(group || defaultCat))
         }
 
         function renderChannels(list) {
+            list = list.filter(
+    (channel, index, self) =>
+        index === self.findIndex(
+            c => c.url === channel.url
+        )
+);
             const grid = document.getElementById('channel-grid');
             grid.innerHTML = '';
             list.forEach(ch => {
@@ -273,6 +293,9 @@ if (!categories.includes(group || defaultCat))
         }
 
         function playStream(ch) {
+            currentChannelIndex = allChannels.findIndex(
+    c => c.url === ch.url
+);
             const video = document.getElementById('video-player');
             document.getElementById('current-title').innerText = ch.name;
             document.getElementById('current-cat').innerText = ch.category;
@@ -340,6 +363,29 @@ document.getElementById('searchInput')
         }
     });
 });
+        document.getElementById('nextBtn').onclick = () => {
+
+    if(currentChannelIndex < allChannels.length - 1){
+
+        playStream(
+            allChannels[currentChannelIndex + 1]
+        );
+
+    }
+
+};
+
+document.getElementById('prevBtn').onclick = () => {
+
+    if(currentChannelIndex > 0){
+
+        playStream(
+            allChannels[currentChannelIndex - 1]
+        );
+
+    }
+
+};
         window.addEventListener('storage', () => location.reload());
     </script>
 
