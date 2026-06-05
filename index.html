@@ -242,13 +242,19 @@ if (cached) {
                     const logo = line.match(/tvg-logo="(.*?)"/)?.[1] || "";
                     const group = line.match(/group-title="(.*?)"/)?.[1];
 
+const finalCategory =
+    defaultCat === "Auto"
+    ? (group || defaultCat)
+    : defaultCat;
+
 current = {
     name,
     logo,
-    category: group || defaultCat
+    category: finalCategory
 };
 
-if (!categories.includes(group || defaultCat))
+if (!categories.includes(finalCategory))
+    categories.push(finalCategory);
     categories.push(group || defaultCat);
                 } else if (line.startsWith("http")) {
                     if (current) {
