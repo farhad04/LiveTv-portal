@@ -147,13 +147,13 @@ to{background-position:200% center;}
 
 <button id="prevBtn"
 class="cat-btn flex-1 text-white"
-style="background:linear-gradient(to right,#ff007f,#00f2fe,#4facfe,#ff007f);">
+style="background:linear-gradient(45deg,#ff512f,#dd2476);">
 ⏮ PREV
 </button>
 
 <button id="nextBtn"
 class="cat-btn flex-1 text-white"
-style="background:linear-gradient(to right,#ff007f,#00f2fe,#4facfe,#ff007f);">
+style="background:linear-gradient(45deg,#00c6ff,#0072ff);">
 NEXT ⏭
 </button>
 
@@ -190,7 +190,7 @@ NEXT ⏭
         ];
 
         let allChannels = [];
-        let categories = ["All"];
+        let categories = ["All","Favorites"];
         let currentChannelIndex = 0;
 
         async function fetchAllPlaylists() {
@@ -288,7 +288,25 @@ if (!categories.includes(group || defaultCat))
             list.forEach(ch => {
                 const div = document.createElement('div');
                 div.className = 'channel-card';
-                div.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/716/716429.png'"><h3 class="text-[9px] font-bold truncate uppercase">${ch.name}</h3>`;
+                const favorites =
+JSON.parse(
+localStorage.getItem('favorites')
+) || [];
+
+div.innerHTML = `
+<img src="${ch.logo}"
+onerror="this.src='https://cdn-icons-png.flaticon.com/512/716/716429.png'">
+
+<h3 class="text-[9px] font-bold truncate uppercase">
+${ch.name}
+</h3>
+
+<button
+onclick="toggleFavorite(event,'${ch.url}')"
+style="font-size:16px;border:none;background:none;cursor:pointer;">
+${favorites.includes(ch.url) ? '⭐' : '☆'}
+</button>
+`;
                 div.onclick = () => playStream(ch);
                 grid.appendChild(div);
             });
@@ -314,7 +332,51 @@ if (!categories.includes(group || defaultCat))
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function toggleFavorite(event, url) {
+
+    event.stopPropagation();
+
+    let favorites =
+        JSON.parse(
+            localStorage.getItem('favorites')
+        ) || [];
+
+    if (favorites.includes(url)) {
+
+        favorites =
+            favorites.filter(
+                item => item !== url
+            );
+
+    } else {
+
+        favorites.push(url);
+
+    }
+
+    localStorage.setItem(
+        'favorites',
+        JSON.stringify(favorites)
+    );
+
+    renderChannels(allChannels);
+        }
         function filterCat(catName, btn) {
+            if (catName === 'Favorites') {
+
+    const favorites =
+        JSON.parse(
+            localStorage.getItem('favorites')
+        ) || [];
+
+    renderChannels(
+        allChannels.filter(
+            ch => favorites.includes(ch.url)
+        )
+    );
+
+    return;
+            }
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             if (catName === 'All') renderChannels(allChannels);
