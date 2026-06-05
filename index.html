@@ -270,7 +270,13 @@ if (!categories.includes(group || defaultCat))
             categories.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.className = `cat-btn ${cat === 'All' ? 'active' : ''}`;
-                btn.innerText = cat.toUpperCase();
+                if(cat === 'Favorites'){
+    btn.innerText = '⭐ FAVORITES';
+    btn.style.background = 'gold';
+    btn.style.color = 'black';
+} else {
+    btn.innerText = cat.toUpperCase();
+}
                 btn.onclick = () => filterCat(cat, btn);
                 tabs.appendChild(btn);
             });
@@ -294,18 +300,30 @@ localStorage.getItem('favorites')
 ) || [];
 
 div.innerHTML = `
+<div style="position:relative;">
+
 <img src="${ch.logo}"
 onerror="this.src='https://cdn-icons-png.flaticon.com/512/716/716429.png'">
+
+<button
+onclick="toggleFavorite(event,'${ch.url}')"
+style="
+position:absolute;
+top:-5px;
+right:-5px;
+background:none;
+border:none;
+font-size:16px;
+cursor:pointer;
+z-index:10;">
+${favorites.includes(ch.url) ? '⭐' : '☆'}
+</button>
 
 <h3 class="text-[9px] font-bold truncate uppercase">
 ${ch.name}
 </h3>
 
-<button
-onclick="toggleFavorite(event,'${ch.url}')"
-style="font-size:16px;border:none;background:none;cursor:pointer;">
-${favorites.includes(ch.url) ? '⭐' : '☆'}
-</button>
+</div>
 `;
                 div.onclick = () => playStream(ch);
                 grid.appendChild(div);
