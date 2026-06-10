@@ -152,6 +152,11 @@ class="cat-btn flex-1 text-white"
 style="background:linear-gradient(45deg,#ff512f,#dd2476);">
 ⏮ PREV
 </button>
+                    <button id="pipBtn"
+class="cat-btn flex-1 text-white"
+style="background:linear-gradient(45deg,#28a745,#20c997);">
+📺 PiP
+                    </button>
 
 <button id="nextBtn"
 class="cat-btn flex-1 text-white"
@@ -482,6 +487,19 @@ document.getElementById('prevBtn').onclick = () => {
 
     }
 
+};
+        document.getElementById("pipBtn").onclick = async () => {
+    const video = document.getElementById("video-player");
+
+    try {
+        if (document.pictureInPictureElement) {
+            await document.exitPictureInPicture();
+        } else {
+            await video.requestPictureInPicture();
+        }
+    } catch (err) {
+        console.log("PiP Error:", err);
+    }
 };
         //window.addEventListener('storage', () => location.reload());
     </script>
