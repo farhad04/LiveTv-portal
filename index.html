@@ -91,6 +91,8 @@ to{background-position:200% center;}
 }
 
 </style>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff0000">
 </head>
 <body class="bg-[#050505] text-white">
 
@@ -274,11 +276,21 @@ categories.splice(2, 0, "FiFa⚽");
                 const btn = document.createElement('button');
                 btn.className = `cat-btn ${cat === 'All' ? 'active' : ''}`;
                 if(cat === 'Favorites'){
-    btn.innerText = '⭐ FAVORITES';
+    const favCount =
+(JSON.parse(localStorage.getItem('favorites')) || []).length;
+
+btn.innerText = `⭐ FAVORITES (${favCount})`;
     btn.style.background = 'gold';
     btn.style.color = 'black';
 } else {
-    btn.innerText = cat.toUpperCase();
+    const count =
+cat === "All"
+? allChannels.length
+: cat === "Favorites"
+? (JSON.parse(localStorage.getItem('favorites')) || []).length
+: allChannels.filter(c => c.category === cat).length;
+
+btn.innerText = `${cat.toUpperCase()} (${count})`;
 }
                 btn.onclick = () => filterCat(cat, btn);
                 tabs.appendChild(btn);
@@ -475,5 +487,63 @@ document.getElementById('prevBtn').onclick = () => {
     </script>
 
 <div class="footer-logo">MD FARHAD RANA</div>
+<button id="installBtn"
+style="
+display:none;
+position:fixed;
+bottom:20px;
+right:20px;
+z-index:9999;
+padding:12px 20px;
+background:#ff0000;
+color:white;
+border:none;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;">
+📲 Install App
+</button>
+
+<script>
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBtn').style.display = 'block';
+});
+
+document.getElementById('installBtn').addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+
+    deferredPrompt = null;
+    document.getElementById('installBtn').style.display = 'none';
+});
+</script>
+<div id="visitorCount"
+style="
+position:fixed;
+bottom:20px;
+left:20px;
+background:#111;
+color:#fff;
+padding:8px 12px;
+border-radius:10px;
+font-size:12px;
+z-index:9999;">
+👥 Visitors: Loading...
+</div>
+
+<script>
+fetch("https://api.countapi.xyz/hit/mdplive/visitors")
+.then(res => res.json())
+.then(data => {
+    document.getElementById("visitorCount").innerHTML =
+        "👥 Visitors: " + data.value;
+});
+</script>    
 </body>
 </html>
