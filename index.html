@@ -224,21 +224,6 @@ NEXT ⏭
             const manualCats = JSON.parse(localStorage.getItem(KEY_CAT)) || [];
 categories = [...new Set([...categories, ...manualCats])];
 
-//categories = [
-    "All",
-    "Favorites",
-    "FiFa⚽",
-    "Stable Tv",
-    "Sports",
-    "Tv",
-    "Toffee",
-    "Ayna ott",
-    "Roarzone",
-    
-    "Dish",
-    "AKASH GO TV"
-];
-
 localStorage.setItem(
     'cached_channels',
     JSON.stringify(allChannels)
