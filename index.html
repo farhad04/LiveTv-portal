@@ -222,17 +222,43 @@ NEXT ⏭
             allChannels = [...allChannels, ...manualChannels];
             
             const manualCats = JSON.parse(localStorage.getItem(KEY_CAT)) || [];
-            categories = [...new Set([...categories, ...manualCats])];
+categories = [...new Set([...categories, ...manualCats])];
 
-            localStorage.setItem(
+categories = [
+    "All",
+    "Favorites",
+    "FiFa⚽",
+    "Stable Tv",
+    "Sports",
+    "Tv",
+    "Toffee",
+    "Ayna ott",
+    "Roarzone",
+    
+    "Dish",
+    "AKASH GO TV"
+];
+
+localStorage.setItem(
     'cached_channels',
     JSON.stringify(allChannels)
 );
-            allChannels.sort((a, b) =>
-    a.name.localeCompare(b.name)
-);
-            document.getElementById('status-msg').style.display = 'none';
-            renderUI();
+
+allChannels.sort((a, b) => {
+
+    const catA = categories.indexOf(a.category);
+    const catB = categories.indexOf(b.category);
+
+    if (catA !== catB) {
+        return catA - catB;
+    }
+
+    return a.name.localeCompare(b.name);
+
+});
+
+document.getElementById('status-msg').style.display = 'none';
+renderUI();
         }
 
         function parseM3U(data, defaultCat) {
