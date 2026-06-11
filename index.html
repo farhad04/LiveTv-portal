@@ -229,9 +229,7 @@ localStorage.setItem(
 document.getElementById('status-msg').style.display = 'none';
 renderUI();
             if (allChannels.length > 0) {
-    setTimeout(() => {
-        playStream(allChannels[0]);
-    }, 1000);
+    playStream(allChannels[0]);
             
         }
 
@@ -354,49 +352,24 @@ ${ch.name}
         }
 
         function playStream(ch) {
-
-    currentChannelIndex = allChannels.findIndex(
-        c => c.url === ch.url
-    );
-
-    const video = document.getElementById('video-player');
-
-    video.muted = true;
-
-    document.getElementById('current-title').innerText = ch.name;
-    document.getElementById('current-cat').innerText = ch.category;
-    document.getElementById('current-logo').src = ch.logo;
-
-    if (Hls.isSupported()) {
-
-        const hls = new Hls();
-
-        hls.loadSource(ch.url);
-        hls.attachMedia(video);
-
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-
-            video.play().catch(err => {
-                console.log(err);
-            });
-
-        });
-
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-
-        video.src = ch.url;
-
-        video.play().catch(err => {
-            console.log(err);
-        });
-
-    }
-
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-}
+            currentChannelIndex = allChannels.findIndex(
+    c => c.url === ch.url
+);
+            const video = document.getElementById('video-player');
+            document.getElementById('current-title').innerText = ch.name;
+            document.getElementById('current-cat').innerText = ch.category;
+            document.getElementById('current-logo').src = ch.logo;
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(ch.url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = ch.url;
+                video.play();
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
         function toggleFavorite(event, url) {
 
