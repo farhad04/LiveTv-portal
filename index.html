@@ -103,9 +103,11 @@ to{background-position:200% center;}
     z-index:15;
 }
 
-.player-overlay .icon{
-    font-size:50px;
-    margin-bottom:10px;
+.player-overlay .icon img{
+    width:80px;
+    height:80px;
+    border-radius:20px;
+    object-fit:cover;
 }
 
 .player-overlay h3{
@@ -140,7 +142,9 @@ to{background-position:200% center;}
                 <video id="video-player" class="w-full h-full" controls autoplay playsinline poster="/icon-512.png"></video>
                 <div class="farhad-watermark">FARHAD</div>
                 <div class="player-overlay" id="playerOverlay">
-    
+    <div class="icon">
+    <img src="/icon-512.png" alt="Logo">
+    </div>
     <h3>চ্যানেল নির্বাচন করুন</h3>
     <p>নিচের তালিকা থেকে একটি চ্যানেলে ট্যাপ করুন</p>
                 </div>
