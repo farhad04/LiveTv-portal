@@ -228,6 +228,9 @@ NEXT ⏭
     'cached_channels',
     JSON.stringify(allChannels)
 );
+            allChannels.sort((a, b) =>
+    a.name.localeCompare(b.name)
+);
             document.getElementById('status-msg').style.display = 'none';
             renderUI();
         }
