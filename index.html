@@ -109,7 +109,7 @@ to{background-position:200% center;}
     <main class="pt-16 container mx-auto px-4 pb-10">
         <section class="max-w-4xl mx-auto">
             <div class="relative rounded-2xl overflow-hidden bg-black aspect-video border border-white/10 shadow-2xl">
-                <video id="video-player" class="w-full h-full" controls autoplay muted playsinline poster="/icon-512.png"></video>
+                <video id="video-player" class="w-full h-full" controls autoplay playsinline poster="/icon-512.png"></video>
                 <div class="farhad-watermark">FARHAD</div>
                 <div id="player-loader" class="absolute inset-0 flex flex-col items-center justify-center bg-black/80 hidden">
     <img src="https://smashinghub.com/wp-content/uploads/2014/08/cool-loading-animated-gif-3.gif"
@@ -228,9 +228,6 @@ localStorage.setItem(
 
 document.getElementById('status-msg').style.display = 'none';
 renderUI();
-            if (allChannels.length > 0) {
-    playStream(allChannels[0]);
-            
         }
 
         function parseM3U(data, defaultCat) {
