@@ -90,6 +90,34 @@ text-transform:uppercase;
 to{background-position:200% center;}
 }
 
+        .player-overlay{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.85);
+    color:#fff;
+    text-align:center;
+    z-index:15;
+}
+
+.player-overlay .icon{
+    font-size:50px;
+    margin-bottom:10px;
+}
+
+.player-overlay h3{
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:5px;
+}
+
+.player-overlay p{
+    font-size:12px;
+    color:#aaa;
+}
 </style>
     <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ff0000">
@@ -111,6 +139,11 @@ to{background-position:200% center;}
             <div class="relative rounded-2xl overflow-hidden bg-black aspect-video border border-white/10 shadow-2xl">
                 <video id="video-player" class="w-full h-full" controls autoplay playsinline poster="/icon-512.png"></video>
                 <div class="farhad-watermark">FARHAD</div>
+                <div class="player-overlay" id="playerOverlay">
+    
+    <h3>চ্যানেল নির্বাচন করুন</h3>
+    <p>নিচের তালিকা থেকে একটি চ্যানেলে ট্যাপ করুন</p>
+                </div>
                 <div id="player-loader" class="absolute inset-0 flex flex-col items-center justify-center bg-black/80 hidden">
     <img src="https://smashinghub.com/wp-content/uploads/2014/08/cool-loading-animated-gif-3.gif"
          style="width:120px;height:120px;">
@@ -349,6 +382,7 @@ ${ch.name}
         }
 
         function playStream(ch) {
+            document.getElementById('playerOverlay').style.display = 'none';
             currentChannelIndex = allChannels.findIndex(
     c => c.url === ch.url
 );
